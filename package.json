@@ -1,0 +1,23 @@
+{
+  "name": "taskdev",
+  "version": "0.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --env-file .env src/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "colors": "^1.4.0",
+    "express": "^4.21.1",
+    "mysql2": "^3.11.3",
+    "node.js": "^0.0.1-security",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0"
+  }
+}
