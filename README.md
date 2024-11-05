@@ -1,18 +1,23 @@
-![Logo](src/img/devware_logo.png)
+# TaskDev
+
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
 Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br><br>
 
-Características:
+<img src="src/img/devware_logo.png" alt="DaveWare logo">
+
+### Características:
+- 2FA con Google Authenticator
 - Chat
-- Tarjetas
-- Código
+- Gestor de tareas
 - Futura integración con Github
 - Calendario
 - Interfaz personalizable
 <br><br>
 
-Tecnologías utilizadas:
+### Tecnologías:
+Front:
+- React
+Back:
 - Node.js
 - Express
-- React
 - MySQL
