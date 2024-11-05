@@ -3,7 +3,7 @@
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
 Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br><br>
 
-![src/img/devware_logo.png]
+<img src="src/img/devware_logo.png" alt="DaveWare logo">
 
 Características:
 - Chat
