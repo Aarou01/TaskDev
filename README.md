@@ -5,7 +5,7 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 
 <img src="src/img/devware_logo.png" alt="DaveWare logo">
 
-### Características:
+## Características:
 - 2FA con Google Authenticator
 - Chat
 - Gestor de tareas
@@ -14,7 +14,7 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 - Interfaz personalizable
 <br><br>
 
-### Tecnologías:
+## Tecnologías:
 Front:
 - React
 Back:
