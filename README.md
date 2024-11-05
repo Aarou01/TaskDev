@@ -14,8 +14,9 @@ Características:
 - Interfaz personalizable
 <br><br>
 
-Tecnologías utilizadas:
+Tecnologías:
+- React
 - Node.js
 - Express
-- React
 - MySQL
+- 2FA con Google Authenticator
