@@ -15,9 +15,9 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 <br><br>
 
 ## Tecnologías:
-Front:
-- React <br>
-Back:
+### Front:
+- React
+### Back:
 - Node.js
 - Express
 - MySQL
