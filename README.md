@@ -21,3 +21,7 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 - Node.js
 - Express
 - MySQL
+### Herramientas:
+- Figma
+- Trello
+- PostMan
