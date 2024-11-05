@@ -1,9 +1,9 @@
+<img src="src/img/devware_logo.png" alt="DaveWare logo">
+De parte de DevWare traemos:
 # TaskDev
 
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
 Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br><br>
-
-<img src="src/img/devware_logo.png" alt="DaveWare logo">
 
 ## Características:
 - 2FA con Google Authenticator
