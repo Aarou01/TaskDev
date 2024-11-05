@@ -55,12 +55,12 @@ app.listen(PORT, () => {
 // Register
 
 const secret = authenticator.generateSecret()
-console.log('Secreto:', secret)
+// console.log('Secreto:', secret)
 await insert_into_query('secret_saver', 'secret, user_id', `${secret}, ${user_id}`)
 
 
 const token = authenticator.generate(secret)
-console.log('Código TOTP:', token)
+// console.log('Código TOTP:', token)
 
 // Crear el URI para el código QR
 let email = await select_query('users', 'email', `id = ${user_id}`)
@@ -72,5 +72,6 @@ QRCode.toDataURL(otpauth, (err, imageUrl) => {
         console.error('Error al generar el QR:', err)
         return
     }
-    res.send(`<img src= "${imageUrl}"></img>`) 
+    res.send(`<img src= "${imageUrl}"></img>`)
 })
+
