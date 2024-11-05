@@ -18,7 +18,7 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 Front:
 - React
 <br>
-Back:<br>
+Back:
 - Node.js
 - Express
 - MySQL
