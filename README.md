@@ -1,5 +1,5 @@
 <img src="src/img/devware_logo.png" alt="DaveWare logo">
-De parte de DevWare traemos:
+De parte de DevWare traemos:<br>
 # TaskDev
 
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
