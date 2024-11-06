@@ -11,7 +11,6 @@ insert_into_query('sercret_saver', 'secret, user_id', `${secret}, ${user_id}`)
 
     app.post("/verify-token", (req, res) => {
     const { token } = req.body;
-    
     const isValid = authenticator.verify({ token, secret })
     
     if (isValid) {
