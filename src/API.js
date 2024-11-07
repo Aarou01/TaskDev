@@ -8,7 +8,7 @@ import { validate_register } from './Validations.js'
 import color from 'colors'
 import cookieParser from 'cookie-parser'
 import jwt from 'jsonwebtoken'
-import { SECRET_JWT_KEY } from './data'
+import { SECRET_JWT_KEY } from './data.js'
 
 
 
@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000
 
 app.use(express.json())
 app.use(cookieParser())
-app.use((req,res, next) => {
+app.use((req, res, next) => {
     const token = req.cookies.access_token
 
     req.session = { user: null }
@@ -30,38 +30,78 @@ app.use((req,res, next) => {
 })
 
 
-app.get('/', (req, res) => {})
+app.get('/', (req, res) => {
+    const token = req.cookies.access_token
+    if (!token) return res.redirect('/login')
+    res.redirect('/home')
+})
+
+
+app.get('/login', (req, res) => {
+    res.send(`
+        <form action="/login" method="POST">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required>
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required>
+          <button type="submit">Log In</button>
+        </form>
+      `)
+
+})
 
 app.post('/login', async (req, res) => {
-    const { user } = req.session
-    if (user) {return res.render('home', user)}
 
-
-
+    // const { user } = req.session
+    // if (user) {return res.render('home', user)}
 
     const { email, password } = req.body
 
     var stored_password = await select_query('user', 'password', `email = '${email}'`)
 
-    const isValid = await bcrypt.compare(password, stored_password[0].password)
-    if (!isValid){res.status(401); return}
+    try {
+        const isValid = await bcrypt.compare(password, stored_password[0].password)
+        if (!isValid){res.status(401); return}
+    } catch {
+        res.status(404) 
+        return
+    }
 
     const token = jwt.sign({ id: user.id, username: user.username}, SECRET_JWT_KEY, {expiresIn: '1h'})
     res.cookie('access_token', token, {
-    httpOnly: true, // Solo se puede acceder a la coockie a través de http, no por js
-    secure: process.env.NODE_ENV != 'production', // La cookie solo se puede acceder en https
-    sameSite: 'strict', // La cookie solo se puede acceder en el mismo dominio
-    maxAge: 60 * 60 * 1000 // Expira en 1 hora
+        httpOnly: true,
+        secure: process.env.NODE_ENV != 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000 
     }).send({user, token})
 
     res.status(200)
-    res.send('<h1>Hello world</h1>')
+    res.redirect('/home')
 })
 
-
+app.get('/register', (req, res) => {
+    res.send(`
+        <form action="/register" method="POST">
+          <label for="name">Name:</label>
+          <input type="name" id="name" name="name" required>
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required>
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required>
+          <label for="password_repeat">Repeat Password:</label>
+          <input type="password" id="password" name="password" required>
+          <button type="submit">Log In</button>
+        </form>
+      `)
+})
 
 app.post('/register', async (req, res) => {
-    const { name, email, password } = req.body
+    const { name, email, password, repeat_password } = req.body
+
+    if (password!== repeat_password) {
+        res.status(400).send('Passwords do not match')
+        return
+    }
     
     if (!validate_register(name, email, password)) {
         res.status(500)
@@ -72,20 +112,23 @@ app.post('/register', async (req, res) => {
         
         await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
         res.status(201)
-
+        res.redirect('/home')
     }
-    
+})
+
+app.get('/home', (req, res) => {
+    res.send('<h1>Home Page</h1>')
 })
 
 
 
 
+// app.get('/protected', (req, res) => {
+//     const { user } = req.session
+//     if (!user) {return res.status(403).res.send("Not authorized")}
+//     res.render('protected', user)
+// })
 
-app.get('/protected', (req, res) => {
-    const { user } = req.session
-    if (!user) {return res.status(403).res.send("No está autorizado")}
-    res.render('protected', user)
-})
 
 app.post('/logout', (req, res) => {
     res.clearCookie('access_token')
