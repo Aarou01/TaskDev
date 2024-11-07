@@ -15,12 +15,15 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 <br><br>
 
 ## Tecnologías:
+
 ### Front:
 - React
+
 ### Back:
 - Node.js
 - Express
 - MySQL
+
 ### Herramientas:
 - Figma
 - Trello

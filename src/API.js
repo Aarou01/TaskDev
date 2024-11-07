@@ -4,28 +4,58 @@ import { authenticator } from 'otplib'
 import { v4, validate } from "uuid"
 import bcrypt from 'bcrypt'
 import { SATL_ROUNDS } from './data.js'
-import { validate_register } from './Validation.js'
+import { validate_register } from './Validations.js'
 import color from 'colors'
+import cookieParser from 'cookie-parser'
+import jwt from 'jsonwebtoken'
+import { SECRET_JWT_KEY } from './data'
 
 
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000  
 
 app.use(express.json())
+app.use(cookieParser())
+app.use((req,res, next) => {
+    const token = req.cookies.access_token
+
+    req.session = { user: null }
+
+    try {
+        const data = jwt.verify(token, SECRET_JWT_KEY)
+        req.session.user = data
+    } catch {}
+    next()
+})
+
 
 app.get('/', (req, res) => {})
 
 app.post('/login', async (req, res) => {
+    const { user } = req.session
+    if (user) {return res.render('home', user)}
+
+
+
+
     const { email, password } = req.body
 
     var stored_password = await select_query('user', 'password', `email = '${email}'`)
 
     const isValid = await bcrypt.compare(password, stored_password[0].password)
-    if (!isValid){res.send(401); return}
+    if (!isValid){res.status(401); return}
 
-    res.json({ success: true }, 200)
-    // res.send('HOME PAGE')
+    const token = jwt.sign({ id: user.id, username: user.username}, SECRET_JWT_KEY, {expiresIn: '1h'})
+    res.cookie('access_token', token, {
+    httpOnly: true, // Solo se puede acceder a la coockie a través de http, no por js
+    secure: process.env.NODE_ENV != 'production', // La cookie solo se puede acceder en https
+    sameSite: 'strict', // La cookie solo se puede acceder en el mismo dominio
+    maxAge: 60 * 60 * 1000 // Expira en 1 hora
+    }).send({user, token})
+
+    res.status(200)
+    res.send('<h1>Hello world</h1>')
 })
 
 
@@ -49,10 +79,18 @@ app.post('/register', async (req, res) => {
 
 
 
-// app.post('/logout', (req, res) => {cerrar cookies})
 
 
-// app.get('/protected', (req, res) => {})
+app.get('/protected', (req, res) => {
+    const { user } = req.session
+    if (!user) {return res.status(403).res.send("No está autorizado")}
+    res.render('protected', user)
+})
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('access_token')
+    .render('login')
+})
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
