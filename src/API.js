@@ -10,13 +10,14 @@ import cookieParser from 'cookie-parser'
 import jwt from 'jsonwebtoken'
 import { SECRET_JWT_KEY } from './data.js'
 
-
-
 const app = express()
-const PORT = process.env.PORT || 3000  
+const PORT = process.env.PORT || 3000
+
+app.set('view engine', 'ejs')
 
 app.use(express.json())
 app.use(cookieParser())
+// app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
     const token = req.cookies.access_token
 
@@ -31,22 +32,15 @@ app.use((req, res, next) => {
 
 
 app.get('/', (req, res) => {
-    const token = req.cookies.access_token
-    if (!token) return res.redirect('/login')
-    res.redirect('/home')
+    // res.render('index')
+    // const token = req.cookies.access_token
+    // if (!token) return res.redirect('/register')
+    res.redirect('/register')
 })
 
 
 app.get('/login', (req, res) => {
-    res.send(`
-        <form action="/login" method="POST">
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" required>
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" required>
-          <button type="submit">Log In</button>
-        </form>
-      `)
+    res.render('')
 
 })
 
@@ -67,53 +61,52 @@ app.post('/login', async (req, res) => {
         return
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username}, SECRET_JWT_KEY, {expiresIn: '1h'})
-    res.cookie('access_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV != 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 1000 
-    }).send({user, token})
+    // const token = jwt.sign({ id: user.id, username: user.username}, SECRET_JWT_KEY, {expiresIn: '1h'})
+    // res.cookie('access_token', token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV != 'production',
+    //     sameSite: 'strict',
+    //     maxAge: 60 * 60 * 1000
+    // }).send({user, token})
 
     res.status(200)
     res.redirect('/home')
 })
 
 app.get('/register', (req, res) => {
-    res.send(`
-        <form action="/register" method="POST">
-          <label for="name">Name:</label>
-          <input type="name" id="name" name="name" required>
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" required>
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" required>
-          <label for="password_repeat">Repeat Password:</label>
-          <input type="password" id="password" name="password" required>
-          <button type="submit">Log In</button>
-        </form>
-      `)
+    res.render('page_register')
 })
 
 app.post('/register', async (req, res) => {
     const { name, email, password, repeat_password } = req.body
 
-    if (password!== repeat_password) {
-        res.status(400).send('Passwords do not match')
-        return
-    }
+    res.send(`Username: ${name}, Password: ${password}`)
+
+    // if (password!== repeat_password) {
+    //     res.status(400).send('Passwords do not match')
+    //     return
+    // }
     
-    if (!validate_register(name, email, password)) {
-        res.status(500)
-    } else {
-        console.log("Generando usuario".bgYellow)
-        let hashedPassword = await bcrypt.hash(password, SATL_ROUNDS)
-        const hash = v4()
+    // try {
+    //     var IsValid = validate_register(name, email, password)
+    // } catch (err) {
+    //     console.log('Error:', err)
+    //     res.status(500)
+    //     alert(err.message)
+    //     // Luego añadir una notificación más estética
+    // }
+    // if (!IsValid) {
+    //     res.status(500)
+    //     return
+    // } else {
+    //     console.log("Generando usuario".bgYellow)
+    //     let hashedPassword = await bcrypt.hash(password, SATL_ROUNDS)
+    //     const hash = v4()
         
-        await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
-        res.status(201)
-        res.redirect('/home')
-    }
+    //     await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
+    //     res.status(201)
+    //     res.redirect('/home')   
+    // }
 })
 
 app.get('/home', (req, res) => {
@@ -140,6 +133,11 @@ app.listen(PORT, () => {
 })
 
 
+
+
+
+// 2fA google authenticator
+
 // const secret = authenticator.generateSecret()
 // console.log('Secreto:', secret)
 
@@ -150,10 +148,6 @@ app.listen(PORT, () => {
 // // Verificar el código TOTP
 // const isValid = authenticator.check(token, secret)
 // console.log('Código válido:', isValid)
-
-
-
-// Register
 
 // const secret = authenticator.generateSecret()
 // // console.log('Secreto:', secret)
@@ -175,4 +169,3 @@ app.listen(PORT, () => {
 //     }
 //     res.send(`<img src= "${imageUrl}"></img>`)
 // })
-

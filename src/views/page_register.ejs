@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../public/reset.css">
+    <link rel="stylesheet" href="../public/page_register.css">
+
+    <title>Inicio de Sesión</title>
+
+</head>
+<body>
+    <div class="form-container">
+        <h2>Registrarse</h2>
+        <form action="/register" method="POST">
+ 
+            <label for="nombre">Nombre:</label>
+            <input placeholder="Nombre" name="name" required>
+
+            <label for="email">Email:</label>
+            <input placeholder="email@example.com" name="email" required>
+
+            <label for="contraseña">Contraseña:</label>
+            <input placeholder="******" name="password" type="password" required>
+
+            <label for="contraseña">Repita contraseña:</label>
+            <input placeholder="******" name="repeat_password" type="password" required>
+
+            <button type="submit">Registrarse</button>
+        </form>
+    </div>
+
+
+</body>
+<script src="page_register.js"></script>
+</html>
