@@ -1,11 +1,13 @@
 ## Inicio
 Crea un archivo llamado "data.js" dentro de la carpeta "/src" y coloca la siguiente información:
+    import crypto from 'crypto'
+
     export const HOST = ''
     export const USER = ''
     export const PASSWORD = ''
     export const DATABASE = ''
     export const SATL_ROUNDS = 0
-    export const SECRET_JWT_KEY = 0
+    export const SECRET_JWT_KEY = crypto.randomBytes(32).toString('hex')
 
 ## validate_register
 Una función asíncrona que toma como argumentos:
