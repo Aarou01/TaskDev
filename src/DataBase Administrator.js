@@ -30,7 +30,7 @@ async function try_query(query) {
 
 function injection_verify(query){
     query = query.toLowerCase()
-    const keywords = ['alter', 'drop', 'delete', 'table', 'truncate', 'database', 'create', 'insert', 'from'];
+    const keywords = ['alter', 'drop', 'delete', 'table', 'truncate', 'database', 'create', 'insert', 'from', 'where', 'update', 'union', 'or', 'and', 'grant', 'sleep', 'benchmark', 'having', 'concat', 'substirng', 'extractvalue', 'into', 'outfile', 'load_file', '@@version', 'user']
 
     if (keywords.some(keyword => query.includes(keyword))) {
         throw new Error('An injection attempt has been detected. Query rejected.'.red)
