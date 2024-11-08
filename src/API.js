@@ -162,9 +162,8 @@ app.get('/2fa', async (req, res) => {
         }
         return res.send(`<img src= "${imageUrl}"></img>`)
     })
-    console.log(req.session.user.email)
+
     var user_hash = await select_query('user', 'hash', `email = '${req.session.user.email}'`)
-    console.log(user_hash[0].hash)
     await insert_into_query('auth', 'secret, user_hash', `'${secret}', '${user_hash[0].hash}'`)
 })
 
@@ -179,8 +178,9 @@ app.post('/2fa', async (req, res) => {
     if (user_token.length != 6) {return res.send('Invalid code')}
     const user_hash = req.session.user.hash
     const secret = await select_query('auth','secret', `user_hash = '${user_hash}'`)
-    
-    const isValid = authenticator.check(user_token, secret)
+    console.log(user_token)
+    console.log(secret[0].secret)
+    const isValid = authenticator.verify({token: user_token, secret: secret[0].secret})
     
     if (!isValid){return res.send('Error code')}
     res.status(200).redirect('/home')
