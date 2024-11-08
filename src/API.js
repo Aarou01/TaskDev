@@ -4,11 +4,13 @@ import { authenticator } from 'otplib'
 import { v4, validate } from "uuid"
 import bcrypt from 'bcrypt'
 import { SATL_ROUNDS } from './data.js'
-import { validate_register } from './Validations.js'
+import { validate_register } from './Functions.js'
 import color from 'colors'
 import cookieParser from 'cookie-parser'
-import jwt from 'jsonwebtoken'
 import { SECRET_JWT_KEY } from './data.js'
+import { create_JWT } from './Functions.js'
+import jwt from 'jsonwebtoken'
+import QRCode from 'qrcode'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -20,36 +22,38 @@ app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
     const token = req.cookies.access_token
-
     req.session = { user: null }
 
     try {
         const data = jwt.verify(token, SECRET_JWT_KEY)
         req.session.user = data
-    } catch {}
+        // console.log("DATA " + JSON.stringify(data))
+    } catch (err) {
+        console.log("No token found")
+    }
     next()
 })
 
 
 app.get('/', (req, res) => {
-    // res.render('index')
-    // const token = req.cookies.access_token
-    // if (!token) return res.redirect('/register')
-    res.redirect('/register')
+    const user = req.session.user
+    if (user) {return res.redirect('home')}
+    return res.redirect('/login')
 })
 
 
-app.get('/login', (req, res) => {
-    res.render('page_login')
-
-})
+app.get('/login', async(req, res) => {
+    const user = req.session.user
+    console.log(user)
+    if (user) {return res.redirect('/home')}
+    return res.render('page_login')}
+)
 
 app.post('/login', async (req, res) => {
 
-    // const { user } = req.session
-    // if (user) {return res.render('home', user)}
-
     const { email, password } = req.body
+    let query_email = await select_query('user', '*', `email = '${email}'`)
+    if (!query_email) {return res.send('User Not found').status(404)}
 
     var stored_password = await select_query('user', 'password', `email = '${email}'`)
 
@@ -61,26 +65,39 @@ app.post('/login', async (req, res) => {
         return
     }
 
-    // const token = jwt.sign({ id: user.id, username: user.username}, SECRET_JWT_KEY, {expiresIn: '1h'})
-    // res.cookie('access_token', token, {
-    //     httpOnly: true,
-    //     secure: process.env.NODE_ENV != 'production',
-    //     sameSite: 'strict',
-    //     maxAge: 60 * 60 * 1000
-    // }).send({user, token})
+    let result = await select_query('user', '*',  `email = '${email}'`)
+    result = result[0]
+
+    const user = {
+        name: result.name,
+        email: result.email,
+        password: result.password,
+        date: result.date_registration,
+        hash: result.hash,
+        level_permissions: result.level_permissions
+    }
+
+    const token = create_JWT(user, '1h')
+    res.cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV != 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000
+    })
+
 
     res.status(200)
     res.redirect('/home')
 })
 
 app.get('/register', (req, res) => {
-    res.render('page_register')
+    const user = req.session.user
+    if (user) {return res.redirect('/home')}
+    return res.render('page_register')
 })
 
 app.post('/register', async (req, res) => {
     const { name, email, password, repeat_password } = req.body
-
-    // console.log(name, email, password, repeat_password)
 
     if (password !== repeat_password) {
         res.status(400).send('Passwords do not match')
@@ -92,15 +109,13 @@ app.post('/register', async (req, res) => {
     if (IsValid === true) {
         console.log("Generando usuario".bgYellow)
         let hashedPassword = await bcrypt.hash(password, SATL_ROUNDS)
-        const hash = v4()
         
-        await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
+        await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${v4()}'`)
         res.status(201)
-        res.redirect('/home')
+        return res.redirect('/home')
     } else {
         console.log('Error:', IsValid)
-        res.status(400).send(`${IsValid}`)
-        return
+        return res.status(400).send(`${IsValid}`)
         // Añadir una notificación más estética
     }
 
@@ -108,62 +123,72 @@ app.post('/register', async (req, res) => {
 })
 
 app.get('/home', (req, res) => {
-    res.send('<h1>Home Page</h1>')
+    const user = req.session.user
+    if (!user) {return res.redirect('/login')}
+    res.send(`<h1>Hi ${req.session.user.name}</h1>`)
 })
 
 
 
 
-// app.get('/protected', (req, res) => {
-//     const { user } = req.session
-//     if (!user) {return res.status(403).res.send("Not authorized")}
-//     res.render('protected', user)
-// })
+app.get('/admin', (req, res) => {
+    const user = req.session.user
+    if (!user) {return res.redirect('/login').status(404).send('User not found')}
+    if (user.level_permissions != 10) {
+        console.log(user.level_permissions)
+        return res.redirect('/home').status(403).send("Not authorized")}
+    res.render('page_admin')
+})
 
 
-app.post('/logout', (req, res) => {
+app.get('/logout', (req, res) => {
     res.clearCookie('access_token')
-    .render('login')
+    .redirect('/login')
 })
+
+
+
+
+app.get('/2fa', async (req, res) => {
+    const secret = authenticator.generateSecret()
+    console.log('Secreto:', secret)
+
+    const otpauth = authenticator.keyuri(req.session.user.email, 'TaskDev', secret)
+    
+    QRCode.toDataURL(otpauth, (err, imageUrl) => {
+        if (err) {
+            console.error('Error al generar el QR:', err)
+            return
+        }
+        return res.send(`<img src= "${imageUrl}"></img>`)
+    })
+    console.log(req.session.user.email)
+    var user_hash = await select_query('user', 'hash', `email = '${req.session.user.email}'`)
+    console.log(user_hash[0].hash)
+    await insert_into_query('auth', 'secret, user_hash', `'${secret}', '${user_hash[0].hash}'`)
+})
+
+app.get('/2fa_auth', async (req, res) => {
+    res.render('2fa_google')
+})
+
+
+app.post('/2fa', async (req, res) => {
+    const { user_token } = req.body
+
+    if (user_token.length != 6) {return res.send('Invalid code')}
+    const user_hash = req.session.user.hash
+    const secret = await select_query('auth','secret', `user_hash = '${user_hash}'`)
+    
+    const isValid = authenticator.check(user_token, secret)
+    
+    if (!isValid){return res.send('Error code')}
+    res.status(200).redirect('/home')
+
+})
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
 })
 
-
-
-
-
-// 2fA google authenticator
-
-// const secret = authenticator.generateSecret()
-// console.log('Secreto:', secret)
-
-// // Generar un código TOTP
-// const token = authenticator.generate(secret)
-// console.log('Código TOTP:', token)
-
-// // Verificar el código TOTP
-// const isValid = authenticator.check(token, secret)
-// console.log('Código válido:', isValid)
-
-// const secret = authenticator.generateSecret()
-// // console.log('Secreto:', secret)
-// await insert_into_query('secret_saver', 'secret, user_id', `${secret}, ${user_id}`)
-
-
-// const token = authenticator.generate(secret)
-// // console.log('Código TOTP:', token)
-
-// // Crear el URI para el código QR
-// let email = await select_query('users', 'email', `id = ${user_id}`)
-// const otpauth = authenticator.keyuri(email, 'TaskDev', secret)
-
-// // Generar el código QR
-// QRCode.toDataURL(otpauth, (err, imageUrl) => {
-//     if (err) {
-//         console.error('Error al generar el QR:', err)
-//         return
-//     }
-//     res.send(`<img src= "${imageUrl}"></img>`)
-// })

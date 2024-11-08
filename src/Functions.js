@@ -1,6 +1,8 @@
 import { select_query } from './db/DataBase Administrator.js'
 import validator from 'validator'
 import color from 'colors'
+import jwt from 'jsonwebtoken'
+import { SECRET_JWT_KEY } from './data.js'
 
 export async function validate_register(name, email, password) {
 
@@ -16,4 +18,10 @@ export async function validate_register(name, email, password) {
     if (user[0]) return 'The Name already exists'
 
     return true
+}
+
+
+export function create_JWT(user, expires) {
+    const token = jwt.sign(user, SECRET_JWT_KEY, {expiresIn: `${expires}`})
+    return token
 }

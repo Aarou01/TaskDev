@@ -27,10 +27,10 @@
             const form = document.getElementById('myForm')
         
             form.addEventListener('submit', async (event) => {
-              event.preventDefault()
+            event.preventDefault()
         
-              const formData = new FormData(form)
-              const data = Object.fromEntries(formData.entries())
+            const formData = new FormData(form)
+            const data = Object.fromEntries(formData.entries())
         
             const response = await fetch('/register', {
                 method: 'POST',
