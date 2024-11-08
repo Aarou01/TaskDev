@@ -1,5 +1,5 @@
 ## Inicio
-Crea un archivo llamado "data.js" y coloca la siguiente información:
+Crea un archivo llamado "data.js" dentro de la carpeta "/src" y coloca la siguiente información:
     export const HOST = ''
     export const USER = ''
     export const PASSWORD = ''
