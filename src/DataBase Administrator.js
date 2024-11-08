@@ -28,6 +28,15 @@ async function try_query(query) {
     }
 }
 
+function injection_verify(query){
+    query = query.toLowerCase()
+    const keywords = ['alter', 'drop', 'delete', 'table', 'truncate', 'database', 'create', 'insert', 'from'];
+
+    if (keywords.some(keyword => query.includes(keyword))) {
+        throw new Error('An injection attempt has been detected. Query rejected.'.red)
+    }
+}
+
 
 async function select_query(table, columns, condition) {
     let query
@@ -36,6 +45,7 @@ async function select_query(table, columns, condition) {
     } else {
         query = `SELECT ${columns} FROM ${table} WHERE ${condition};`
     }
+    injection_verify(`${table} ${columns} ${condition}`)
     return try_query(query)
 }
 
@@ -45,11 +55,13 @@ async function delete_query(table, condition) {
         return
     }
     let query = `DELETE FROM ${table} WHERE ${condition};`
+    injection_verify(`${table} ${condition}`)
     return try_query(query)
 }
 
 async function insert_into_query(table, columns, data) {
     const query = `INSERT INTO ${table} (${columns}) VALUES (${data});`
+    injection_verify(`${table} ${columns} ${data}`)
     return try_query(query)
 }
 
