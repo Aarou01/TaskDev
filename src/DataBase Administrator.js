@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise'
-import { HOST, USER, PASSWORD, DATABASE } from '../data.js'
+import { HOST, USER, PASSWORD, DATABASE } from './data.js'
 import color from 'colors'
 
 async function create_connection() {

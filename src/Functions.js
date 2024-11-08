@@ -1,4 +1,4 @@
-import { select_query } from './db/DataBase Administrator.js'
+import { select_query } from './DataBase Administrator.js'
 import validator from 'validator'
 import color from 'colors'
 import jwt from 'jsonwebtoken'

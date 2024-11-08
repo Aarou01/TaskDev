@@ -1,5 +1,5 @@
 import express from 'express'
-import {select_query, delete_query, insert_into_query} from './db/DataBase Administrator.js'
+import {select_query, delete_query, insert_into_query} from './DataBase Administrator.js'
 import { authenticator } from 'otplib'
 import { v4, validate } from "uuid"
 import bcrypt from 'bcrypt'
