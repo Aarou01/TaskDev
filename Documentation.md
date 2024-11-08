@@ -5,6 +5,7 @@ Crea un archivo llamado "data.js" y coloca la siguiente información:
     export const PASSWORD = ''
     export const DATABASE = ''
     export const SATL_ROUNDS = 0
+    export const SECRET_JWT_KEY = 0
 
 ## validate_register
 Una función asíncrona que toma como argumentos:
