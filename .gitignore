@@ -1,6 +1,0 @@
-src/db/data.js
-*.json
-otros/
-node_modules/
-*.rtf
-Informacion.txt
