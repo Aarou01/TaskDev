@@ -17,7 +17,7 @@ app.set('view engine', 'ejs')
 
 app.use(express.json())
 app.use(cookieParser())
-// app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
     const token = req.cookies.access_token
 
@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-    res.render('')
+    res.render('page_login')
 
 })
 
@@ -54,10 +54,10 @@ app.post('/login', async (req, res) => {
     var stored_password = await select_query('user', 'password', `email = '${email}'`)
 
     try {
-        const isValid = await bcrypt.compare(password, stored_password[0].password)
-        if (!isValid){res.status(401); return}
+        var isValid = await bcrypt.compare(password, stored_password[0].password)
+        if (!isValid) {res.status(401).send('Invalid password'); return}
     } catch {
-        res.status(404) 
+        res.status(404)
         return
     }
 
@@ -80,33 +80,31 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
     const { name, email, password, repeat_password } = req.body
 
-    res.send(`Username: ${name}, Password: ${password}`)
+    // console.log(name, email, password, repeat_password)
 
-    // if (password!== repeat_password) {
-    //     res.status(400).send('Passwords do not match')
-    //     return
-    // }
-    
-    // try {
-    //     var IsValid = validate_register(name, email, password)
-    // } catch (err) {
-    //     console.log('Error:', err)
-    //     res.status(500)
-    //     alert(err.message)
-    //     // Luego añadir una notificación más estética
-    // }
-    // if (!IsValid) {
-    //     res.status(500)
-    //     return
-    // } else {
-    //     console.log("Generando usuario".bgYellow)
-    //     let hashedPassword = await bcrypt.hash(password, SATL_ROUNDS)
-    //     const hash = v4()
+    if (password !== repeat_password) {
+        res.status(400).send('Passwords do not match')
+        return
+    }
+
+    var IsValid = await validate_register(name, email, password)
+
+    if (IsValid === true) {
+        console.log("Generando usuario".bgYellow)
+        let hashedPassword = await bcrypt.hash(password, SATL_ROUNDS)
+        const hash = v4()
         
-    //     await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
-    //     res.status(201)
-    //     res.redirect('/home')   
-    // }
+        await insert_into_query('user', 'name, email, password, hash', `'${name}', '${email}', '${hashedPassword}', '${hash}'`)
+        res.status(201)
+        res.redirect('/home')
+    } else {
+        console.log('Error:', IsValid)
+        res.status(400).send(`${IsValid}`)
+        return
+        // Añadir una notificación más estética
+    }
+
+    
 })
 
 app.get('/home', (req, res) => {
