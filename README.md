@@ -1,4 +1,4 @@
-<img src="src/img/devware_logo.png" alt="DaveWare logo">
+<img src="src/img/taskdev.png" alt="TaskDev">
 
 # TaskDev
 De parte de DevWare traemos TaskDev:<br>
