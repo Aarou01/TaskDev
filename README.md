@@ -1,6 +1,5 @@
 <img src="src/img/taskdev.png" alt="TaskDev">
 
-# TaskDev
 De parte de DevWare traemos TaskDev:<br>
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
 Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br><br>
