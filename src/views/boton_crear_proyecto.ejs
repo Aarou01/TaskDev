@@ -1,0 +1,22 @@
+<form action="/new_project" method="GET">
+    <button type="submit">Nuevo proyecto</button>
+</form>
+
+<script>
+    const form = document.getElementById('myForm')
+
+    form.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
+    const formData = new FormData(form)
+    const data = Object.fromEntries(formData.entries())
+
+    const response = await fetch('/new_project', {
+        method: 'get',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+        })
+    })
+  </script>

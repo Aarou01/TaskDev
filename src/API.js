@@ -53,7 +53,7 @@ app.post('/login', async (req, res) => {
 
     const { email, password } = req.body
     let query_email = await select_query('user', '*', `email = '${email}'`)
-    if (!query_email) {return res.send('User Not found').status(404)}
+    if (!query_email[0]) {return res.send('User Not found').status(404)}
 
     var stored_password = await select_query('user', 'password', `email = '${email}'`)
 
@@ -61,8 +61,7 @@ app.post('/login', async (req, res) => {
         var isValid = await bcrypt.compare(password, stored_password[0].password)
         if (!isValid) {res.status(401).send('Invalid password'); return}
     } catch {
-        res.status(404)
-        return
+        return res.status(404)
     }
 
     let result = await select_query('user', '*',  `email = '${email}'`)
@@ -186,6 +185,48 @@ app.post('/2fa', async (req, res) => {
     res.status(200).redirect('/home')
 
 })
+
+
+
+app.get('/projects', async (req, res) => {
+    const user = req.session.user
+    if (!user) {return res.redirect('/login')}
+    const result = await select_query('user_has_projects', 'projects_id', `user_hash = '${user.hash}'`)
+    if (!result[0]) {res.render('boton_crear_proyecto')}
+    else {
+        res.send(result)
+        // var proyects
+        // result.forEach( async (proyect_id) => {
+        //     proyects += await select_query('proyects', '*', `id = ${proyect_id}`)
+        // })
+        // res.send(proyects)
+    }
+})
+
+app.get('/new_project', async (req, res) => {
+    const user = req.session.user
+    if (!user) {return res.redirect('/login')}
+    res.render('page_new_project')
+    
+})
+
+app.post('/new_project', async (req, res) => {
+    const { name, description, link } = req.body
+    console.log(name, description, link)
+    await insert_into_query('projects', 'title, description, link', `'${name}', '${description}', '${link}'`)
+    let project_id = await select_query('projects', 'id', `title = '${name}'`)
+    console.log(project_id[0].id, req.session.user.hash)
+    await insert_into_query('user_has_projects', 'projects_id, user_hash', ` ${project_id[0].id}, '${req.session.user.hash}'`)
+    res.status(201).send('Project created successfully')
+    res.redirect('/projects')
+
+})
+
+
+
+
+
+
 
 
 app.listen(PORT, () => {

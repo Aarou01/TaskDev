@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../public/reset.css">
+    <link rel="stylesheet" href="../public/page_register.css">
+
+    <title>Inicio de Sesión</title>
+
+</head>
+<body>
+    <div class="form-container">
+        <h2>Crear proyecto</h2>
+        <form action="/new_project" method="POST">
+ 
+            <label for="nombre">Titulo:</label>
+            <input name="name" required>
+
+            <label for="email">Descripcion:</label>
+            <input name="description" required>
+
+            <label for="contraseña">link:</label>
+            <input name="link" type="text" required>
+
+            <button type="submit">Crear</button>
+        </form>
+
+        <script>
+            const form = document.getElementById('myForm')
+        
+            form.addEventListener('submit', async (event) => {
+              event.preventDefault()
+        
+                const formData = new FormData(form)
+                const data = Object.fromEntries(formData.entries())
+              
+                const response = await fetch('/new_project', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(data)
+                })
+            })
+          </script>
+
+    </div>
+
+
+</body>
+<script src="page_register.js"></script>
+</html>

@@ -16,7 +16,7 @@ export async function validate_register(name, email, password) {
     user = await select_query('user', 'id', `name = '${name}'`)
 
     if (user[0]) return 'The Name already exists'
-
+    
     return true
 }
 

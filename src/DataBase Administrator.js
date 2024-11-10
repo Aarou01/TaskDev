@@ -7,7 +7,8 @@ async function create_connection() {
         host: HOST,
         user: USER,
         password: PASSWORD,
-        database: DATABASE
+        database: DATABASE,
+        multipleStatements: false
     });
     
     console.log('Conectado como ID '.green + connection.threadId)
@@ -28,15 +29,28 @@ async function try_query(query) {
     }
 }
 
-function injection_verify(query){
+function injection_verify(query) {
     query = query.toLowerCase()
-    const keywords = ['alter', 'drop', 'delete', 'table', 'truncate', 'database', 'create', 'insert', 'from', 'where', 'update', 'union', 'or', 'and', 
-        'grant', 'sleep', 'benchmark', 'having', 'concat', 'substirng', 'extractvalue', 'into', 'outfile', 'load_file', '@@version', 'user']
 
-    if (keywords.some(keyword => query.includes(keyword))) {
-        throw new Error('An injection attempt has been detected. Query rejected.'.red)
+    const injectionPatterns = [
+        /--/g,          
+        /\b(select|insert|update|delete|drop|alter|create|truncate|exec|union|show|grant|revoke|benchmark)\b/g,
+        /(\b(=|<|>|like|between|in)\b[^=]*\b(or|and)\b[^=]*)/g,
+        /\b(extractvalue|load_file|sleep|benchmark)\b/g,
+        /\b(@@version|@@user|@@database)\b/g 
+    ]
+
+    for (let pattern of injectionPatterns) {
+        if (pattern.test(query)) {
+            throw new Error('An injection attempt has been detected. Query rejected.'.red)
+        }
+    }
+
+    if (query.includes('drop database') || query.includes('drop table')) {
+        throw new Error('Dangerous SQL command detected: DROP TABLE or DROP DATABASE. Query rejected.'.red)
     }
 }
+
 
 
 async function select_query(table, columns, condition) {
