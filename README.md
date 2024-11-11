@@ -8,7 +8,6 @@ Tiene como objetivo crear espacios de trabajo para equipos de desarolladores.<br
 - 2FA con Google Authenticator
 - Chat
 - Gestor de tareas
-- Futura integración con Github
 - Calendario
 - Interfaz personalizable
 <br><br>
