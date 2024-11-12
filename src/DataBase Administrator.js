@@ -11,7 +11,7 @@ async function create_connection() {
         multipleStatements: false
     });
     
-    console.log('Conectado como ID '.green + connection.threadId)
+    // console.log('Conectado como ID '.green + connection.threadId)
     return connection
 }
 

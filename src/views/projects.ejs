@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../css/reset.css">
+<link rel="stylesheet" href="../css/projects.css">
+
+<% projects.forEach((project) => { %>
+        <div class="card">
+            <div class="card-content">
+                <h3><%= project.title || 'Nombre no disponible' %></h3>
+                <p><%= project.description || 'Descripción no disponible' %></p>
+                <a href="<%= project.link || '#' %>">Ver proyecto</a>
+                <div class="card-footer">
+                    <form action="/projects" method="POST">
+                        <button class="delete-btn" data-project-id="<%= project.id %>">
+                            <img src="../img/trash-icon.png" alt="Borrar" class="trash-icon" width="25"/>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+        
+            deleteButtons.forEach((btn) => {
+                btn.addEventListener('click', async (event) => {
+                    event.preventDefault()
+        
+                    try {
+                        const response = await fetch('/projects', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ project_id: btn.getAttribute('data-project-id') })
+                        })
+        
+                        if (response.ok) {
+                            const projectCard = document.getElementById(`project-${projectId}`);
+                            projectCard.remove()
+                        } else {
+                            console.error('Error al eliminar el proyecto')
+                        }
+                    } catch (error) {
+                        console.error('Error en la solicitud DELETE:', error)
+                    }
+                })
+            })
+        </script>
+        
+    <% }) %>

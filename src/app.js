@@ -16,6 +16,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.set('view engine', 'ejs')
+app.use(express.static('public'))
 
 app.use(express.json())
 app.use(cookieParser())
@@ -29,7 +30,7 @@ app.use((req, res, next) => {
         req.session.user = data
         // console.log("DATA " + JSON.stringify(data))
     } catch (err) {
-        console.log("No token found")
+        // console.log("No token found")
     }
     next()
 })
@@ -44,7 +45,7 @@ app.get('/', (req, res) => {
 
 app.get('/login', async(req, res) => {
     const user = req.session.user
-    console.log(user)
+
     if (user) {return res.redirect('/home')}
     return res.render('page_login')}
 )
@@ -124,7 +125,8 @@ app.post('/register', async (req, res) => {
 app.get('/home', (req, res) => {
     const user = req.session.user
     if (!user) {return res.redirect('/login')}
-    res.send(`<h1>Hi ${req.session.user.name}</h1>`)
+    let username = req.session.user.name
+    res.render('home', {username}  )
 })
 
 
@@ -190,18 +192,37 @@ app.post('/2fa', async (req, res) => {
 
 app.get('/projects', async (req, res) => {
     const user = req.session.user
+    
     if (!user) {return res.redirect('/login')}
+
     const result = await select_query('user_has_projects', 'projects_id', `user_hash = '${user.hash}'`)
-    if (!result[0]) {res.render('boton_crear_proyecto')}
-    else {
-        res.send(result)
-        // var proyects
-        // result.forEach( async (proyect_id) => {
-        //     proyects += await select_query('proyects', '*', `id = ${proyect_id}`)
-        // })
-        // res.send(proyects)
+
+    if (!result[0]) {return res.render('boton_crear_proyecto')}
+    
+    var projects = []
+    
+    for (const project of result) {
+        const stored_project = await select_query('projects', '*', `id = '${project.projects_id}'`)
+        projects.push(stored_project[0])
     }
+    console.log(projects)
+    res.render('projects',  { projects } )
 })
+
+
+app.post('/projects', async (req, res) => {
+    const user = req.session.user
+    const { project_id } = req.body
+    console.log(req.body, user.hash)
+    res.status(201)
+
+    // await delete_query('projects', `id = ${project_id}`)
+    // await delete_query('user_has_projects', `user_hash = ${user.hash}`)
+    // console.log(req.body)
+    // res.redirect('/projects')
+
+})
+
 
 app.get('/new_project', async (req, res) => {
     const user = req.session.user
@@ -212,21 +233,16 @@ app.get('/new_project', async (req, res) => {
 
 app.post('/new_project', async (req, res) => {
     const { name, description, link } = req.body
-    console.log(name, description, link)
+    
     await insert_into_query('projects', 'title, description, link', `'${name}', '${description}', '${link}'`)
+
     let project_id = await select_query('projects', 'id', `title = '${name}'`)
-    console.log(project_id[0].id, req.session.user.hash)
+    
     await insert_into_query('user_has_projects', 'projects_id, user_hash', ` ${project_id[0].id}, '${req.session.user.hash}'`)
-    res.status(201).send('Project created successfully')
+    res.send('Project created successfully').status(201)
     res.redirect('/projects')
 
 })
-
-
-
-
-
-
 
 
 app.listen(PORT, () => {

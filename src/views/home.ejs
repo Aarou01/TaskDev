@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <h1>Hi <%= username %></h1>
+    <form action="/projects" method="GET">
+        <button type="submit">Proyectos</button>
+    </form>
+    
+    <script>
+        const form_projects = document.getElementById('myForm')
+    
+        form_projects.addEventListener('submit', async (event) => {
+        event.preventDefault()
+    
+        const formData = new FormData(form_projects)
+        const data = Object.fromEntries(formData.entries())
+    
+        const response = await fetch('/projects', {
+            method: 'get',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+            })
+        })
+      </script>
+
+<form action="/new_project" method="GET">
+    <button type="submit">Nuevo proyecto</button>
+</form>
+
+<script>
+    const form_new_project = document.getElementById('myForm')
+
+    form_new_project.addEventListener('submit', async (event) => {
+    event.preventDefault()
+
+    const formData = new FormData(form_new_project)
+    const data = Object.fromEntries(formData.entries())
+
+    const response = await fetch('/new_project', {
+        method: 'get',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+        })
+    })
+  </script>
+
+
+</body>
+</html>
