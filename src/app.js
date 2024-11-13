@@ -1,5 +1,5 @@
 import express from 'express'
-import {select_query, delete_query, insert_into_query} from './DataBase Administrator.js'
+import { select_query, delete_query, insert_into_query, update_query } from './DataBase Administrator.js'
 import { authenticator } from 'otplib'
 import { v4, validate } from "uuid"
 import bcrypt from 'bcrypt'
@@ -71,8 +71,6 @@ app.post('/login', async (req, res) => {
     const user = {
         name: result.name,
         email: result.email,
-        password: result.password,
-        date: result.date_registration,
         hash: result.hash,
         level_permissions: result.level_permissions
     }
@@ -84,8 +82,6 @@ app.post('/login', async (req, res) => {
         sameSite: 'strict',
         maxAge: 60 * 60 * 1000
     })
-
-
     res.status(200)
     res.redirect('/home')
 })
@@ -195,31 +191,48 @@ app.get('/projects', async (req, res) => {
     
     if (!user) {return res.redirect('/login')}
 
-    const result = await select_query('user_has_projects', 'projects_id', `user_hash = '${user.hash}'`)
+    const result = await select_query('user_has_project', 'project_id', `user_hash = '${user.hash}'`)
 
     if (!result[0]) {return res.render('boton_crear_proyecto')}
     
     var projects = []
     
     for (const project of result) {
-        const stored_project = await select_query('projects', '*', `id = '${project.projects_id}'`)
+        const stored_project = await select_query('project', '*', `id = '${project.project_id}'`)
         projects.push(stored_project[0])
     }
-    console.log(projects)
     res.render('projects',  { projects } )
+})
+
+
+app.delete('/projects', async (req, res) => {
+    const user = req.session.user
+    const { project_id } = req.body
+    console.log(project_id)
+
+    await delete_query('user_has_project', `user_hash = '${user.hash}' and project_id = ${project_id}`)
+    await delete_query('project', `id = ${project_id}`)
+    
+    res.status(201)
+    res.redirect('/home')
+
 })
 
 
 app.post('/projects', async (req, res) => {
     const user = req.session.user
     const { project_id } = req.body
-    console.log(req.body, user.hash)
-    res.status(201)
+    console.log(project_id)
 
-    // await delete_query('projects', `id = ${project_id}`)
-    // await delete_query('user_has_projects', `user_hash = ${user.hash}`)
-    // console.log(req.body)
-    // res.redirect('/projects')
+    let table
+    let columns
+    let new_data
+    let condition
+    await update_query(`${table}`, `${columns}`, `${new_data}`, `${condition}`)
+    
+    
+    // res.status(201)
+    // res.redirect('/home')
 
 })
 
@@ -233,14 +246,14 @@ app.get('/new_project', async (req, res) => {
 
 app.post('/new_project', async (req, res) => {
     const { name, description, link } = req.body
+    try {
+        await insert_into_query('project', 'title, description, link', `'${name}', '${description}', '${link}'`)
     
-    await insert_into_query('projects', 'title, description, link', `'${name}', '${description}', '${link}'`)
-
-    let project_id = await select_query('projects', 'id', `title = '${name}'`)
-    
-    await insert_into_query('user_has_projects', 'projects_id, user_hash', ` ${project_id[0].id}, '${req.session.user.hash}'`)
-    res.send('Project created successfully').status(201)
-    res.redirect('/projects')
+        let project_id = await select_query('project', 'id', `title = '${name}'`)
+        
+        await insert_into_query('user_has_project', 'project_id, user_hash', ` ${project_id[0].id}, '${req.session.user.hash}'`)
+        res.status(201).redirect('/projects')
+    } catch {}
 
 })
 

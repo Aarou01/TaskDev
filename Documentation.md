@@ -70,3 +70,14 @@ let data = {
 
 Ejemplo sin JSON:
 - console.log(await insert_into_query('city', 'id, name, countrycode, district, population', `${ID}, '${Name}', '${CountryCode}', '${District}', ${Population}`))
+
+### update_query
+Una función asíncrona que actualiza el valor de un registro
+Recibe como argumentos:
+- Tabla
+- Columna
+- Información
+- Condición
+
+Ejemplo:
+await update_query('user', 'name', `'${new_name}'`, `name = '${old_name}'`)

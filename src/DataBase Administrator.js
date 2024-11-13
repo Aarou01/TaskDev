@@ -80,4 +80,14 @@ async function insert_into_query(table, columns, data) {
     return try_query(query)
 }
 
-export { select_query, delete_query, insert_into_query }
+async function update_query(table, columns, data, condition) {
+    const query = `UPDATE ${table} SET ${columns} = ${data} WHERE ${condition};`
+    if (!condition) {
+        console.log('It has to be a condition to update.'.red)
+        return
+    }
+    injection_verify(`${table} ${columns} ${data} ${condition}`)
+    return try_query(query)
+}
+
+export { select_query, delete_query, insert_into_query, update_query }
