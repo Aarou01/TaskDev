@@ -1,4 +1,4 @@
-<img src="src/img/taskdev.png" alt="TaskDev">
+<img src="src/public/img/taskdev.png" alt="TaskDev">
 
 De parte de DevWare traemos TaskDev:<br>
 Una herramienta de organización y planificación de proyectos de desarrollo de software.<br> 
